@@ -1,0 +1,18 @@
+{
+  "name": "jsonsca",
+  "version": "1.0.0",
+  "description": "Serialization tool supporting HTLM5 Structured Clone Algorithm (how postMessage works)",
+  "main": "jsonsca.js",
+  "scripts": {
+    "test": "./node_modules/.bin/jasmine-node ."
+  },
+  "keywords": [
+    "serialization"
+  ],
+  "author": "Calvin Spealman <ironfroggy@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "jasmine": "^2.4.1",
+    "jasmine-node": "^1.14.5"
+  }
+}
