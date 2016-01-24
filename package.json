@@ -1,6 +1,6 @@
 {
   "name": "jsonsca",
-  "version": "1.0.0",
+  "version": "0.0.0",
   "description": "Serialization tool supporting HTLM5 Structured Clone Algorithm (how postMessage works)",
   "main": "jsonsca.js",
   "scripts": {

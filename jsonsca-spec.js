@@ -14,6 +14,75 @@ describe("ReferenceTracker", function(){
   })
 })
 
+describe("the pack() utility", function() {
+  [true, false, 42, "string"].forEach(function(o){
+    it(`Atomic ${o} are preserved`, function(done) {
+      jsonsca.pack(o).then(function(s){
+        expect(s).toEqual(o)
+        done()
+      })
+    });
+  })
+
+  it("represents undefined", function(done){
+    jsonsca.pack(undefined).then(function(s){
+      expect(s.undefined).toBe(true)
+      done()
+    })
+  })
+
+  it("represents null", function(done){
+    jsonsca.pack(null).then(function(s){
+      expect(s.null).toBe(true)
+      done()
+    })
+  })
+
+  it("wraps arrays with 'array' and an 'id'", function(done){
+    jsonsca.pack([1]).then(function(s){
+      expect(s.id).toEqual('1')
+      expect(s.array).toEqual([1])
+      done()
+    })
+  })
+
+  it("wraps objects with 'object' and an 'id'", function(done){
+    jsonsca.pack({x: 42}).then(function(s){
+      expect(s.id).toEqual('1')
+      expect(s.object.x).toEqual(42)
+      done()
+    })
+  })
+
+  it("recycles objects it has seen before", function(done) {
+    let rt = new jsonsca.ReferenceTracker()
+    let obj = {x: 42}
+    jsonsca.pack(obj, rt).then(function(s1){
+      jsonsca.pack(obj, rt).then(function(s2){
+        expect(s1.id).toEqual(s2.reference)
+        done()
+      })
+    })
+  })
+
+  it("recycles objects within arrays", function(done) {
+    let rt = new jsonsca.ReferenceTracker()
+    let obj = {x: 42}
+    let array = [obj, obj]
+    jsonsca.pack(array, rt).then(function(s){
+      expect(s.array[0].id).toEqual(s.array[1].reference)
+      done()
+    })
+  })
+
+  it("nests objects", function(done) {
+    let obj = {a: {b: 1}}
+    jsonsca.pack(obj).then(function(s){
+      expect(s.object.a.object.b).toEqual(1)
+      done()
+    })
+  })
+})
 
 describe("Plain data types:", function() {
   it("Regular numbers are preserved", function(done) {
@@ -102,14 +171,14 @@ describe("Plain data types:", function() {
     let a = {x: 1}
     let b = {y: a}
     let c = {y: a}
-    jsonsca.pack({b, c}).then(function(s) {
+    let obj = {b: b, c: c}
+    jsonsca.pack(obj).then(function(s) {
       try {
         let unpacked = jsonsca.unpack(s)
-        console.log(unpacked)
         unpacked.b.y.x += 1
         expect(unpacked.c.y.x).toEqual(2)
       } catch(e) {
-        console.error(e)
+        console.error("error:", e)
         fail(e)
       }
       done()

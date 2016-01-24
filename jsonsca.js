@@ -111,12 +111,13 @@ module.exports.pack = function(input, reftracker) {
             var promises = [];
             var out = {};
             var proppromise;
-            for (prop in input) {
+            var prop;
+            var props = Object.keys(input).sort();
+            for (prop of props) {
                 if (input.hasOwnProperty(prop)) {
                     proppromise = module.exports.pack(input[prop], reftracker);
                     (function(prop){
                         proppromise.then(function(res){
-                            console.log(res);
                             out[prop] = res;
                         })
                     })(prop);
@@ -145,6 +146,9 @@ module.exports.unpack = function(input, references) {
     }
 
     if (input['reference']) {
+        if (typeof references[input.reference] === 'undefined') {
+            throw "unknown reference: " + input.reference;
+        }
         return references[input.reference];
     }
 
@@ -208,9 +212,11 @@ module.exports.unpack = function(input, references) {
             console.trace("no id:", input);
             throw "Input has no ID:";
         }
-        var out = {}
+        var prop;
+        var out = {};
+        var props = Object.keys(input['object']).sort();
         references[input.id] = out;
-        for (prop in input['object']) {
+        for (prop of props) {
             out[prop] = module.exports.unpack(input['object'][prop], references);
         }
         return out;
